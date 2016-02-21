@@ -7,8 +7,16 @@
 //
 
 #import "ViewController.h"
+#import "VZUser.h"
+#import "ProfileViewController.h"
+#import "DataManager.h"
 
-@interface ViewController ()
+@interface ViewController ()    <UITableViewDelegate,
+                                UITableViewDataSource,
+                                DataManagerDelegate>
+
+@property (nonatomic, weak) IBOutlet UITableView *tableView;
+
 
 @end
 
@@ -19,45 +27,91 @@
 {
     [super viewDidLoad];
     
-    NSURL *newRandomUserURL = [NSURL URLWithString:@"http://api.randomuser.me/?results=10"];
+    
+    UIBarButtonItem *btnReload = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(btnReloadPressed:)];
+    self.navigationController.topViewController.navigationItem.rightBarButtonItem = btnReload;
+    btnReload.enabled=TRUE;
+    btnReload.style=UIBarButtonSystemItemRefresh;
+    
+    [DataManager sharedManager].delegate = self;
+    
+    [[DataManager sharedManager] generateData:@1];
+    
+    
 
-    NSData *newRandomUserData = [NSData dataWithContentsOfURL:newRandomUserURL];
     
-    if (newRandomUserData == nil) return;
+   // [profileButton addTarget:self action:@selector(didPressProfileButton:) forControlEvents:UIControlEventTouchUpInside];
     
-    NSError *error = nil;
-    id object =
-    [NSJSONSerialization JSONObjectWithData:newRandomUserData
-                                    options:0
-                                      error:&error];
     
-    if(error) { /* JSON was malformed, act appropriately here */ }
-    
-    // the originating poster wants to deal with dictionaries;
-    // assuming you do too then something like this is the first
-    // validation step:
-    if([object isKindOfClass:[NSDictionary class]])
-    {
-        NSDictionary *results = object;
-       
-        NSLog(@"%@", [results valueForKeyPath:@"results.user.name"]);
-        
-        NSLog(@"\n\n\n\n\n\n\n%@", results);
+}
 
-        
-        
-    }
-    else
-    {
-        /* there's no guarantee that the outermost object in a JSON
-         packet will be a dictionary; if we get here then it wasn't,
-         so 'object' shouldn't be treated as an NSDictionary; probably
-         you need to report a suitable error condition */
-    }
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self.navigationController setNavigationBarHidden:NO];
+}
+
+- (void)btnReloadPressed:(UIButton *)sender
+{
+    ProfileViewController *controller =
+    [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ProfileViewController class])];
     
-   
+    controller.userID = 500;
+    
+    [self.navigationController pushViewController:controller animated:YES];
 }
 
 
+#pragma mark - Table properties
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return [[[DataManager sharedManager] data] count];
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 75;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ProfileViewController *controller =
+    [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ProfileViewController class])];
+    
+    controller.userID = indexPath.row;
+    
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString * const CellID = @"Cell";
+    
+    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellID];
+    
+    VZUser *user = [[[DataManager sharedManager] data] objectAtIndex:indexPath.row];
+    
+    
+    cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", user.firstName, user.lastName];
+    cell.imageView.image = [UIImage imageWithData:user.avatar];
+    
+    
+    return cell;
+}
+
+
+#pragma mark - FataManager delegate implementation
+
+- (void)dataManagerDidFinishLoadData
+{
+    [self.tableView reloadData];
+}
+
 @end
+
 

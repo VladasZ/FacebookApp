@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Automatic">
-    <entity name="MUser" syncable="YES">
-        <attribute name="mobBirthDate" optional="YES" attributeType="Date" syncable="YES"/>
+    <entity name="MUser" representedClassName="MUser" syncable="YES">
+        <attribute name="mobAvatar" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="mobEmail" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="mobFirstName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="mobGender" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="mobLastName" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="mobSex" optional="YES" attributeType="Boolean" syncable="YES"/>
-        <relationship name="rlsFriends" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MUser" inverseName="rlsFriends" inverseEntity="MUser" syncable="YES"/>
+        <attribute name="mobPhone" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="rlsFriends" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MUser" inverseName="rlsFriends" inverseEntity="MUser" syncable="YES"/>
     </entity>
     <elements>
-        <element name="MUser" positionX="-63" positionY="-18" width="128" height="120"/>
+        <element name="MUser" positionX="-63" positionY="-18" width="128" height="150"/>
     </elements>
 </model>
