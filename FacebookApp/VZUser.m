@@ -8,6 +8,7 @@
 
 #import "VZUser.h"
 #import <UIKit/UIKit.h>
+#import "MUser.h"
 
 
 @implementation VZUser
@@ -27,13 +28,24 @@
         self.email = email;
         self.phone = phone;
         self.avatar = avatar;
+        self.rlsFriends = [[NSMutableSet alloc] init];
     }
     return self;
 }
 
-- (void)addFriend:(VZUser *)friend
+- (instancetype)initWithMUser:(MUser *)mUser
 {
-    [self.rlsFriends addObject:friend];
+    return [self initWithFirstName:mUser.mobFirstName
+                   lastName:mUser.mobLastName
+                     gender:mUser.mobGender
+                      email:mUser.mobEmail
+                      phone:mUser.mobPhone
+                     avatar:mUser.mobAvatar];
+}
+
+- (void)addFriend:(VZUser *)newFriend
+{
+    [self.rlsFriends addObject:newFriend];
 }
 
 - (void)addFriends:(NSSet<VZUser *> *)friends

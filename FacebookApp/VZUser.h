@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class MUser;
+
 @interface VZUser : NSObject
 
 @property (nonatomic, strong) NSString *firstName;
@@ -20,5 +22,7 @@
 
 + (VZUser *)newRandomUser;
 
+- (instancetype)initWithMUser:(MUser *)mUser;
+- (void)addFriend:(VZUser *)newFriend;
 
 @end

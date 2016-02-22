@@ -21,6 +21,8 @@
 		824BB4B11C7A277F00302EE1 /* avatar.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 824BB4AE1C7A277F00302EE1 /* avatar.jpg */; };
 		824BB4B21C7A277F00302EE1 /* background.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 824BB4AF1C7A277F00302EE1 /* background.jpg */; };
 		824BB4B51C7A29CD00302EE1 /* DataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 824BB4B41C7A29CD00302EE1 /* DataManager.m */; };
+		824BB4B71C7B5F4600302EE1 /* View.xib in Resources */ = {isa = PBXBuildFile; fileRef = 824BB4B61C7B5F4600302EE1 /* View.xib */; };
+		824BB4BA1C7BADBC00302EE1 /* PhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 824BB4B91C7BADBC00302EE1 /* PhotoViewController.m */; };
 		82FE480B1C7892DD0054C73B /* CoreDataManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 82FE480A1C7892DD0054C73B /* CoreDataManager.m */; };
 		82FE481A1C78997C0054C73B /* VZUser.m in Sources */ = {isa = PBXBuildFile; fileRef = 82FE48191C78997C0054C73B /* VZUser.m */; };
 		82FE481F1C789A0E0054C73B /* MUser+CoreDataProperties.m in Sources */ = {isa = PBXBuildFile; fileRef = 82FE481C1C789A0E0054C73B /* MUser+CoreDataProperties.m */; };
@@ -76,6 +78,9 @@
 		824BB4AF1C7A277F00302EE1 /* background.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = background.jpg; sourceTree = "<group>"; };
 		824BB4B31C7A29CD00302EE1 /* DataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataManager.h; sourceTree = "<group>"; };
 		824BB4B41C7A29CD00302EE1 /* DataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataManager.m; sourceTree = "<group>"; };
+		824BB4B61C7B5F4600302EE1 /* View.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = View.xib; sourceTree = "<group>"; };
+		824BB4B81C7BADBC00302EE1 /* PhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoViewController.h; sourceTree = "<group>"; };
+		824BB4B91C7BADBC00302EE1 /* PhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoViewController.m; sourceTree = "<group>"; };
 		82FE48091C7892DD0054C73B /* CoreDataManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoreDataManager.h; sourceTree = "<group>"; };
 		82FE480A1C7892DD0054C73B /* CoreDataManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoreDataManager.m; sourceTree = "<group>"; };
 		82FE48181C78997C0054C73B /* VZUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VZUser.h; sourceTree = "<group>"; };
@@ -147,11 +152,14 @@
 				824BB4A61C79F43000302EE1 /* Data  */,
 				8227CACD1C77AEFF007EB293 /* AppDelegate.h */,
 				8227CACE1C77AEFF007EB293 /* AppDelegate.m */,
+				824BB4B81C7BADBC00302EE1 /* PhotoViewController.h */,
+				824BB4B91C7BADBC00302EE1 /* PhotoViewController.m */,
 				824BB4AA1C79F62E00302EE1 /* ProfileViewController.h */,
 				824BB4AB1C79F62E00302EE1 /* ProfileViewController.m */,
 				8227CAD01C77AEFF007EB293 /* ViewController.h */,
 				8227CAD11C77AEFF007EB293 /* ViewController.m */,
 				8227CAD31C77AEFF007EB293 /* Main.storyboard */,
+				824BB4B61C7B5F4600302EE1 /* View.xib */,
 				824BB4AD1C7A277F00302EE1 /* 1.jpg */,
 				824BB4AE1C7A277F00302EE1 /* avatar.jpg */,
 				824BB4AF1C7A277F00302EE1 /* background.jpg */,
@@ -344,6 +352,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				824BB4B71C7B5F4600302EE1 /* View.xib in Resources */,
 				8227CADD1C77AEFF007EB293 /* LaunchScreen.storyboard in Resources */,
 				824BB4B11C7A277F00302EE1 /* avatar.jpg in Resources */,
 				824BB4B01C7A277F00302EE1 /* 1.jpg in Resources */,
@@ -506,6 +515,7 @@
 				82FE480B1C7892DD0054C73B /* CoreDataManager.m in Sources */,
 				8227CACC1C77AEFF007EB293 /* main.m in Sources */,
 				82FE48201C789A0E0054C73B /* MUser.m in Sources */,
+				824BB4BA1C7BADBC00302EE1 /* PhotoViewController.m in Sources */,
 				8227CAD81C77AEFF007EB293 /* FacebookApp.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

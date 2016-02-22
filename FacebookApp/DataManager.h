@@ -8,17 +8,24 @@
 
 #import <Foundation/Foundation.h>
 
+@class VZUser;
+
 @protocol DataManagerDelegate;
 
 @interface DataManager : NSObject
 
-@property (nonatomic, strong) NSMutableArray *data;
+@property (nonatomic, strong) NSMutableArray *allVZUsersData;
 
 @property (nonatomic, weak) id<DataManagerDelegate> delegate;
 
 + (DataManager *)sharedManager;
 
 - (void)generateData:(NSNumber *)numberOfUsers;
+
+- (NSArray *)getAllUsersFromDatabase;
+- (VZUser *)userFromDatabaseAtIndex:(NSUInteger)index;
+- (void)loadVZUsersFromDatabase;
+- (void)createRandomRelationships;
 
 @end
 

@@ -8,6 +8,8 @@
 
 #import "DataManager.h"
 #import "VZUser.h"
+#import "MUser.h"
+#import "CoreDataManager.h"
 
 @implementation DataManager
 
@@ -18,7 +20,7 @@
     
     dispatch_once(&onceToken, ^{
         sharedManager = [[DataManager alloc] init];
-        sharedManager.data = [[NSMutableArray alloc] init];
+        sharedManager.allVZUsersData = [[NSMutableArray alloc] init];
     });
     
     return sharedManager;
@@ -34,11 +36,76 @@
 
 - (void)loadData:(NSNumber *)numberOfUsers
 {
+    
     for (int i = 0; i < numberOfUsers.intValue; i++) {
-        [self.data addObject:[VZUser newRandomUser]];
+        
+         MUser *newUser =
+        [NSEntityDescription insertNewObjectForEntityForName:NSStringFromClass([MUser class])
+                                      inManagedObjectContext:[[CoreDataManager sharedManager] managedObjectContext]];
+        
+        [newUser initWithVZUser:[VZUser newRandomUser]];
+        
+        
     }
     
+    [[CoreDataManager sharedManager] saveContext];
+    
     [self.delegate dataManagerDidFinishLoadData];
+}
+
+- (NSArray *)getAllUsersFromDatabase
+{
+    NSFetchRequest *fetchRequest =
+    [[NSFetchRequest alloc] initWithEntityName:NSStringFromClass([MUser class])];
+    
+    NSError *error = nil;
+    
+    NSArray *mUsers = [[[CoreDataManager sharedManager] managedObjectContext] executeFetchRequest:fetchRequest
+                                                                          error:&error];
+    
+    NSMutableArray *vZUsers = [[NSMutableArray alloc] init];
+    
+    for (MUser *mUser in mUsers) {
+        
+        [vZUsers addObject:[[VZUser alloc] initWithMUser:mUser]];
+        
+    }
+    
+    
+    return vZUsers;
+}
+
+- (VZUser *)userFromDatabaseAtIndex:(NSUInteger)index
+{
+    NSFetchRequest *fetchRequest =
+    [[NSFetchRequest alloc] initWithEntityName:NSStringFromClass([MUser class])];
+    
+    NSError *error = nil;
+    
+    NSArray *mUsers = [[[CoreDataManager sharedManager] managedObjectContext] executeFetchRequest:fetchRequest
+                                                                                            error:&error];
+    
+    return [[VZUser alloc] initWithMUser:[mUsers objectAtIndex:index]];
+}
+
+- (void)loadVZUsersFromDatabase
+{
+    self.allVZUsersData = [self getAllUsersFromDatabase].copy;
+}
+
+- (void)createRandomRelationships
+{
+    for (VZUser *user in self.allVZUsersData) {
+        
+        for (NSUInteger i = 0; arc4random_uniform(20); i++) {
+            
+            [user addFriend:
+             [self.allVZUsersData objectAtIndex:
+              arc4random_uniform((int)self.allVZUsersData.count)]];
+            
+        }
+        
+    }
 }
 
 

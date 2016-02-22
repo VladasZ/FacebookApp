@@ -27,22 +27,38 @@
 {
     [super viewDidLoad];
     
-    
-    UIBarButtonItem *btnReload = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(btnReloadPressed:)];
-    self.navigationController.topViewController.navigationItem.rightBarButtonItem = btnReload;
-    btnReload.enabled=TRUE;
-    btnReload.style=UIBarButtonSystemItemRefresh;
-    
-    [DataManager sharedManager].delegate = self;
-    
-    [[DataManager sharedManager] generateData:@1];
-    
-    
 
+    if (self == [self.navigationController.viewControllers firstObject]) {
+        
+        [DataManager sharedManager].delegate = self;
+        
+        if ([[NSUserDefaults standardUserDefaults] objectForKey:@"haveData"] == NO) {
+            
+            [[NSUserDefaults standardUserDefaults] setObject:@YES forKey:@"haveData"];
+            
+            [[DataManager sharedManager] generateData:@100];
+            
+            NSLog(@"Data generation");
+        }
+        
+        [[DataManager sharedManager] loadVZUsersFromDatabase];
+        
+        [[DataManager sharedManager] createRandomRelationships];
+        
+        self.users = [[DataManager sharedManager] allVZUsersData];
+        
+        VZUser *usser = [[[DataManager sharedManager] allVZUsersData] firstObject];
+        
+        NSLog(@"%@", usser);
+        
+        
+    }
     
-   // [profileButton addTarget:self action:@selector(didPressProfileButton:) forControlEvents:UIControlEventTouchUpInside];
-    
-    
+    [self.tableView setBackgroundColor:[UIColor blackColor]];
+
+    [self.navigationController.navigationBar setBarTintColor:[UIColor grayColor]];
+
+
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -70,7 +86,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[[DataManager sharedManager] data] count];
+    return self.users.count;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -84,6 +100,12 @@
     [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ProfileViewController class])];
     
     controller.userID = indexPath.row;
+    controller.parentController = self;
+    
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    if (cell.selectionStyle != UITableViewCellSelectionStyleNone) {
+        cell.selectionStyle = UITableViewCellSelectionStyleNone;
+    }
     
     [self.navigationController pushViewController:controller animated:YES];
 }
@@ -94,9 +116,10 @@
     
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellID];
     
-    VZUser *user = [[[DataManager sharedManager] data] objectAtIndex:indexPath.row];
+    VZUser *user = [self.users objectAtIndex:indexPath.row];
     
-    
+    cell.backgroundColor = [UIColor blackColor];
+    cell.textLabel.textColor = [UIColor whiteColor];
     cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", user.firstName, user.lastName];
     cell.imageView.image = [UIImage imageWithData:user.avatar];
     

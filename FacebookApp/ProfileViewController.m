@@ -9,6 +9,8 @@
 #import "ProfileViewController.h"
 #import "DataManager.h"
 #import "VZUser.h"
+#import "PhotoViewController.h"
+#import "ViewController.h"
 //#import <QuartzCore/QuartzCore.h>
 
 
@@ -20,15 +22,29 @@ const NSUInteger NameLabelSize = 10;
 const NSUInteger Intend = 10;
 #define RGBCOLOR(r, g, b, a) [UIColor colorWithRed:r/225.0f green:g/225.0f blue:b/225.0f alpha:a]
 
+enum infoViewSubviews
+{
+    infoViewFriendsCountLabel,
+    infoViewMutualFriendsCountLabel,
+    infoViewPhotosCountLabel,
+    infoViewFriendsLabel,
+    infoViewMutualFriendsLabel,
+    infoViewPhotosLabel
+};
+
 @interface ProfileViewController ()
 
 @property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
 @property (nonatomic, strong) UIImageView *topBackgroundImageView;
 @property (nonatomic, strong) UIImageView *avatarImageView;
-@property (nonatomic, weak) IBOutlet UIImageView *scrollBackgroundImageView;
+@property (nonatomic, strong) UIImageView *scrollBackgroundImageView;
 @property (nonatomic, strong) UILabel *nameLabel;
 @property (nonatomic, strong) UILabel *slidingNameLabel;
 @property (nonatomic, strong) UIView *slidingNameView;
+
+@property (nonatomic, strong) NSMutableArray *infoViewSubviews;
+
+@property (nonatomic, weak) VZUser *user;
 
 
 @end
@@ -49,7 +65,7 @@ const NSUInteger Intend = 10;
 
 - (void)createIntefrace
 {
-    VZUser *user = [[DataManager sharedManager].data objectAtIndex:self.userID];
+    self.user = [self.parentController.users objectAtIndex:self.userID];
     
     //CGRect frame = self.scrollView.frame;
     
@@ -84,9 +100,11 @@ const NSUInteger Intend = 10;
     
     UIImageView *backgroundImageView = [[UIImageView alloc] initWithFrame:
     CGRectMake(0,
-               -50,
+               -100,
                self.scrollView.contentSize.width,
                self.scrollView.contentSize.height + 500)];
+    
+
     
     [backgroundImageView setImage:[UIImage imageNamed:@"1.jpg"]];
     [backgroundImageView setContentMode:UIViewContentModeScaleAspectFill];
@@ -103,11 +121,15 @@ const NSUInteger Intend = 10;
                                        avatarSize,
                                        avatarSize)];
     
-    [self.avatarImageView setImage:[UIImage imageWithData:user.avatar]];
+    [self.avatarImageView setImage:[UIImage imageWithData:self.user.avatar]];
     
     self.avatarImageView.layer.cornerRadius = self.avatarImageView.bounds.size.height / 2;
     self.avatarImageView.layer.masksToBounds = YES;
+    self.avatarImageView.userInteractionEnabled = YES;
     
+    [self.avatarImageView addGestureRecognizer:
+     [[UITapGestureRecognizer alloc] initWithTarget:self
+                                             action:@selector(didTapAvatarImage:)]];
 
 
     
@@ -127,7 +149,7 @@ const NSUInteger Intend = 10;
     //[self.nameLabel setBackgroundColor:[UIColor blueColor]];
     
     self.nameLabel.text =
-    [NSString stringWithFormat:@"%@ %@", user.firstName, user.lastName];
+    [NSString stringWithFormat:@"%@ %@", self.user.firstName, self.user.lastName];
     
     
     
@@ -149,6 +171,8 @@ const NSUInteger Intend = 10;
 
 #pragma mark info view
     
+    self.infoViewSubviews = [[NSMutableArray alloc] init];
+    
     UIView *infoView = [[UIView alloc] initWithFrame:
     CGRectMake(Intend,
                CGRectGetMaxY(self.nameLabel.frame),
@@ -160,6 +184,97 @@ const NSUInteger Intend = 10;
     infoView.layer.cornerRadius = 20;
     infoView.layer.masksToBounds = YES;
     
+    
+#pragma mark info view count labels
+    NSUInteger infoSubviewsSize = infoView.frame.size.width / 3;
+    
+    
+    for (NSUInteger i = 0; i < 3; i++) {
+        
+        UILabel *countLabel = [[UILabel alloc] initWithFrame:
+        CGRectMake(infoSubviewsSize * i + Intend,
+                   Intend,
+                   infoSubviewsSize - Intend,
+                   (infoSubviewsSize - Intend) / 2)];
+        
+        [countLabel setText:
+         [@[[NSString stringWithFormat:@"%lu", (unsigned long)self.user.rlsFriends.count],
+            @"0",
+            @"0"] objectAtIndex:i]
+         ];
+        
+        [countLabel setBackgroundColor:RGBCOLOR(0, 0, 100, 0.5)];
+        
+        [countLabel setTextAlignment:NSTextAlignmentCenter];
+        
+        countLabel.layer.cornerRadius = 20;
+        countLabel.layer.masksToBounds = YES;
+        
+        [countLabel setFont:[UIFont systemFontOfSize:50]];
+        [countLabel setTextColor:[UIColor whiteColor]];
+        
+        if (i == infoViewFriendsCountLabel) {
+            
+            [countLabel addGestureRecognizer:
+             [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                     action:@selector(didTapFriendsLabel:)]];
+            
+            [countLabel setUserInteractionEnabled:YES];
+            
+        }
+        
+        [self.infoViewSubviews addObject:countLabel];
+        
+    }
+    
+    
+  
+    
+#pragma mark info view labels
+    
+    for (NSUInteger i = 0; i < 3; i++) {
+        
+        UILabel *countLabel = [[UILabel alloc] initWithFrame:
+        CGRectMake(infoSubviewsSize * i  + Intend,
+                   Intend * 2 + (infoSubviewsSize - Intend) / 2,
+                   infoSubviewsSize - Intend,
+                   (infoSubviewsSize - Intend) / 3)];
+        
+        [countLabel setText:
+         
+         [@[@"Friends", @"Mutual", @"Photos"] objectAtIndex:i]
+         
+         ];
+        
+        //[countLabel setText:@"fdsfsd"];
+        
+        [countLabel setBackgroundColor:RGBCOLOR(0, 0, 100, 0.5)];
+        
+        [countLabel setTextAlignment:NSTextAlignmentCenter];
+        
+        countLabel.layer.cornerRadius = 20;
+        countLabel.layer.masksToBounds = YES;
+        
+        [countLabel setFont:[UIFont systemFontOfSize:20]];
+        [countLabel setTextColor:[UIColor whiteColor]];
+        
+        [self.infoViewSubviews addObject:countLabel];
+        
+    }
+    
+//    infoViewFriendsCountLabel,
+//    infoViewMutualFriendsCountLabel,
+//    infoViewPhotosCountLabel,
+//    infoViewFriendsLabel,
+//    infoViewMutualFriendsLabel,
+//    infoViewPhotosLabel
+    
+    [infoView addSubview:self.infoViewSubviews[infoViewFriendsCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[infoViewMutualFriendsCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[infoViewPhotosCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[infoViewFriendsLabel]];
+    [infoView addSubview:self.infoViewSubviews[infoViewMutualFriendsLabel]];
+    [infoView addSubview:self.infoViewSubviews[infoViewPhotosLabel]];
     
     [self.scrollView addSubview:backgroundImageView];
     [self.scrollView addSubview:self.topBackgroundImageView];
@@ -216,6 +331,33 @@ const NSUInteger Intend = 10;
         
     }
     
+    
+}
+
+#pragma mark - Actions
+
+- (void)didTapAvatarImage:(UITapGestureRecognizer *)sender
+{
+    PhotoViewController *controller =
+    [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([PhotoViewController class])];
+    
+    UIImageView *imageView = (UIImageView *)sender.view;
+    
+    controller.avatarImage = imageView.image;
+    controller.name = self.nameLabel.text;
+    
+    
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+- (void)didTapFriendsLabel:(UITapGestureRecognizer *)sender
+{
+    ViewController *controller =
+    [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ViewController class])];
+    
+    controller.users = [self.user.rlsFriends allObjects];
+    
+    [self.navigationController pushViewController:controller animated:YES];
     
 }
 

@@ -10,6 +10,14 @@
 
 @implementation MUser
 
-// Insert code here to add functionality to your managed object subclass
+- (void)initWithVZUser:(VZUser *)user
+{
+    self.mobAvatar = user.avatar;
+    self.mobEmail = user.email;
+    self.mobFirstName = user.firstName;
+    self.mobGender = user.gender;
+    self.mobLastName = user.lastName;
+    self.mobPhone = user.phone;
+}
 
 @end

@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+@class ViewController;
+
 @interface ProfileViewController : UIViewController
 
 @property (nonatomic) NSUInteger userID;
+@property (nonatomic, weak) ViewController *parentController;
 
 @end
