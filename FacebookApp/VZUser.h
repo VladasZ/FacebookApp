@@ -21,7 +21,12 @@
 @property (nonatomic, strong) NSMutableSet<VZUser *> *rlsFriends;
 
 + (VZUser *)newRandomUser;
-
+- (instancetype)initWithFirstName:(NSString *)firstName
+                         lastName:(NSString *)lastName
+                           gender:(NSString *)gender
+                            email:(NSString *)email
+                            phone:(NSString *)phone
+                           avatar:(NSData *)avatar;
 - (instancetype)initWithMUser:(MUser *)mUser;
 - (void)addFriend:(VZUser *)newFriend;
 

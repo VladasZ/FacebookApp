@@ -10,6 +10,7 @@
 #import "VZUser.h"
 #import "MUser.h"
 #import "CoreDataManager.h"
+#import <UIKit/UIKit.h>
 
 @implementation DataManager
 
@@ -45,7 +46,6 @@
         
         [newUser initWithVZUser:[VZUser newRandomUser]];
         
-        
     }
     
     [[CoreDataManager sharedManager] saveContext];
@@ -60,8 +60,8 @@
     
     NSError *error = nil;
     
-    NSArray *mUsers = [[[CoreDataManager sharedManager] managedObjectContext] executeFetchRequest:fetchRequest
-                                                                          error:&error];
+    NSArray *mUsers = [[[CoreDataManager sharedManager] managedObjectContext] executeFetchRequest:fetchRequest 
+                      error:&error];
     
     NSMutableArray *vZUsers = [[NSMutableArray alloc] init];
     
@@ -90,18 +90,42 @@
 
 - (void)loadVZUsersFromDatabase
 {
-    self.allVZUsersData = [self getAllUsersFromDatabase].copy;
+    self.allVZUsersData = [self getAllUsersFromDatabase].mutableCopy;
+    
+    [self initRootUser];
 }
+
+- (void)initRootUser
+{
+    NSData *myAvatarImage =
+    UIImageJPEGRepresentation([UIImage imageNamed:@"avatar.jpg"], 1);
+    
+    VZUser *rootUser = [[VZUser alloc]
+                        initWithFirstName:@"Vladas"
+                        lastName:@"Zakrevskis"
+                        gender:@"male"
+                        email:@"146100@gmail.com"
+                        phone:@"+375-29-7-626-627"
+                        avatar:myAvatarImage];
+    
+    
+    [self.allVZUsersData insertObject:rootUser atIndex:0];
+    
+}
+
 
 - (void)createRandomRelationships
 {
     for (VZUser *user in self.allVZUsersData) {
         
-        for (NSUInteger i = 0; arc4random_uniform(20); i++) {
+        for (NSUInteger i = 0; arc4random_uniform(10); i++) {
             
-            [user addFriend:
-             [self.allVZUsersData objectAtIndex:
-              arc4random_uniform((int)self.allVZUsersData.count)]];
+            VZUser *newFriend =
+            [self.allVZUsersData objectAtIndex:
+             arc4random_uniform((int)self.allVZUsersData.count)];
+            
+            [user addFriend:newFriend];
+            [newFriend addFriend:user];
             
         }
         

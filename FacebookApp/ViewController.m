@@ -27,6 +27,9 @@
 {
     [super viewDidLoad];
     
+    [self.tableView setBackgroundColor:[UIColor blackColor]];
+    
+    [self.navigationController.navigationBar setBarTintColor:[UIColor grayColor]];
 
     if (self == [self.navigationController.viewControllers firstObject]) {
         
@@ -45,19 +48,17 @@
         
         [[DataManager sharedManager] createRandomRelationships];
         
-        self.users = [[DataManager sharedManager] allVZUsersData];
         
-        VZUser *usser = [[[DataManager sharedManager] allVZUsersData] firstObject];
+        self.users = [[DataManager sharedManager] allVZUsersData].mutableCopy;
         
-        NSLog(@"%@", usser);
+        ProfileViewController *controller = [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ProfileViewController class])];
         
+        controller.parentController = self;
+        controller.userID = 0;
         
+        [self.navigationController pushViewController:controller animated:NO];
+
     }
-    
-    [self.tableView setBackgroundColor:[UIColor blackColor]];
-
-    [self.navigationController.navigationBar setBarTintColor:[UIColor grayColor]];
-
 
 }
 
@@ -134,6 +135,9 @@
 {
     [self.tableView reloadData];
 }
+
+#pragma mark - Another methods
+
 
 @end
 

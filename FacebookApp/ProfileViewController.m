@@ -11,6 +11,7 @@
 #import "VZUser.h"
 #import "PhotoViewController.h"
 #import "ViewController.h"
+#import <MessageUI/MFMailComposeViewController.h>
 //#import <QuartzCore/QuartzCore.h>
 
 
@@ -22,17 +23,17 @@ const NSUInteger NameLabelSize = 10;
 const NSUInteger Intend = 10;
 #define RGBCOLOR(r, g, b, a) [UIColor colorWithRed:r/225.0f green:g/225.0f blue:b/225.0f alpha:a]
 
-enum infoViewSubviews
+enum InfoViewSubviews
 {
-    infoViewFriendsCountLabel,
-    infoViewMutualFriendsCountLabel,
-    infoViewPhotosCountLabel,
-    infoViewFriendsLabel,
-    infoViewMutualFriendsLabel,
-    infoViewPhotosLabel
+    InfoViewFriendsCountLabel,
+    InfoViewMutualFriendsCountLabel,
+    InfoViewPhotosCountLabel,
+    InfoViewFriendsLabel,
+    InfoViewMutualFriendsLabel,
+    InfoViewPhotosLabel
 };
 
-@interface ProfileViewController ()
+@interface ProfileViewController () <MFMailComposeViewControllerDelegate>
 
 @property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
 @property (nonatomic, strong) UIImageView *topBackgroundImageView;
@@ -45,6 +46,7 @@ enum infoViewSubviews
 @property (nonatomic, strong) NSMutableArray *infoViewSubviews;
 
 @property (nonatomic, weak) VZUser *user;
+@property (nonatomic, strong) NSMutableArray *mutualFriends;
 
 
 @end
@@ -55,6 +57,8 @@ enum infoViewSubviews
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    self.mutualFriends = [self getMutalFriendsArray];
     
     [self createIntefrace];
 
@@ -67,19 +71,13 @@ enum infoViewSubviews
 {
     self.user = [self.parentController.users objectAtIndex:self.userID];
     
-    //CGRect frame = self.scrollView.frame;
-    
-    NSLog(@"%f, %f", self.scrollView.frame.origin.x, self.scrollView.frame.origin.y);
-    
-    
-    
 #pragma mark top background image init
     
     self.topBackgroundImageView = [[UIImageView alloc] initWithFrame:
-                                   CGRectMake(0,
-                                              0,
-                                              self.view.frame.size.width,
-                                              self.view.frame.size.height / BackgroundImageSize)];
+    CGRectMake(0,
+               0,
+               self.view.frame.size.width,
+               self.view.frame.size.height / BackgroundImageSize)];
     
     [self.topBackgroundImageView setImage:[UIImage imageNamed:@"background.jpg"]];
     [self.topBackgroundImageView setContentMode:UIViewContentModeScaleAspectFill];
@@ -104,22 +102,18 @@ enum infoViewSubviews
                self.scrollView.contentSize.width,
                self.scrollView.contentSize.height + 500)];
     
-
-    
     [backgroundImageView setImage:[UIImage imageNamed:@"1.jpg"]];
     [backgroundImageView setContentMode:UIViewContentModeScaleAspectFill];
-    
 
-    
 #pragma mark avatar image init
     
     NSUInteger avatarSize = self.view.frame.size.width / AvatarSize;
     
     self.avatarImageView = [[UIImageView alloc] initWithFrame:
-                            CGRectMake(self.view.frame.size.width / 2 - avatarSize / 2,
-                                       CGRectGetMaxY(self.topBackgroundImageView.frame) - avatarSize / 2,
-                                       avatarSize,
-                                       avatarSize)];
+    CGRectMake(self.view.frame.size.width / 2 - avatarSize / 2,
+               CGRectGetMaxY(self.topBackgroundImageView.frame) - avatarSize / 2,
+               avatarSize,
+               avatarSize)];
     
     [self.avatarImageView setImage:[UIImage imageWithData:self.user.avatar]];
     
@@ -131,37 +125,33 @@ enum infoViewSubviews
      [[UITapGestureRecognizer alloc] initWithTarget:self
                                              action:@selector(didTapAvatarImage:)]];
 
-
     
 #pragma mark name label init
     
     NSUInteger nameLabelHeight = self.view.frame.size.height / NameLabelSize;
     
     self.nameLabel = [[UILabel alloc] initWithFrame:
-                      CGRectMake(0,
-                                 CGRectGetMaxY(self.avatarImageView.frame),
-                                 self.view.frame.size.width,
-                                 nameLabelHeight)];
+    CGRectMake(0,
+               CGRectGetMaxY(self.avatarImageView.frame),
+               self.view.frame.size.width,
+               nameLabelHeight)];
     
     [self.nameLabel setFont:[self.nameLabel.font fontWithSize:30]];
     [self.nameLabel setTextColor:[UIColor whiteColor]];
     [self.nameLabel setTextAlignment:NSTextAlignmentCenter];
-    //[self.nameLabel setBackgroundColor:[UIColor blueColor]];
     
     self.nameLabel.text =
     [NSString stringWithFormat:@"%@ %@", self.user.firstName, self.user.lastName];
-    
-    
     
 #pragma mark sliding name label init
     
     self.slidingNameLabel = [self deepLabelCopy:self.nameLabel];
     
     self.slidingNameView = [[UIView alloc] initWithFrame:
-                            CGRectMake(0,
-                                       0,
-                                       self.view.frame.size.width,
-                                       self.view.frame.size.height / NameLabelSize)];
+    CGRectMake(0,
+               0,
+               self.view.frame.size.width,
+               self.view.frame.size.height / NameLabelSize)];
     
     [self.slidingNameView setBackgroundColor:[UIColor blackColor]];
     [self.slidingNameView.layer setZPosition:1];
@@ -186,8 +176,8 @@ enum infoViewSubviews
     
     
 #pragma mark info view count labels
-    NSUInteger infoSubviewsSize = infoView.frame.size.width / 3;
     
+    NSUInteger infoSubviewsSize = infoView.frame.size.width / 3;
     
     for (NSUInteger i = 0; i < 3; i++) {
         
@@ -199,27 +189,29 @@ enum infoViewSubviews
         
         [countLabel setText:
          [@[[NSString stringWithFormat:@"%lu", (unsigned long)self.user.rlsFriends.count],
-            @"0",
+            [NSString stringWithFormat:@"%lu", (unsigned long)self.mutualFriends.count],
             @"0"] objectAtIndex:i]
          ];
         
-        [countLabel setBackgroundColor:RGBCOLOR(0, 0, 100, 0.5)];
+        [self setDefaultStyleToView:countLabel];
         
         [countLabel setTextAlignment:NSTextAlignmentCenter];
-        
-        countLabel.layer.cornerRadius = 20;
-        countLabel.layer.masksToBounds = YES;
-        
         [countLabel setFont:[UIFont systemFontOfSize:50]];
         [countLabel setTextColor:[UIColor whiteColor]];
         
-        if (i == infoViewFriendsCountLabel) {
+        if (i == InfoViewFriendsCountLabel) {
             
             [countLabel addGestureRecognizer:
              [[UITapGestureRecognizer alloc] initWithTarget:self
                                                      action:@selector(didTapFriendsLabel:)]];
+
+        }
+        
+        if (i == InfoViewMutualFriendsCountLabel) {
             
-            [countLabel setUserInteractionEnabled:YES];
+            [countLabel addGestureRecognizer:
+             [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                     action:@selector(didTapMutualLabel:)]];
             
         }
         
@@ -246,15 +238,9 @@ enum infoViewSubviews
          
          ];
         
-        //[countLabel setText:@"fdsfsd"];
-        
-        [countLabel setBackgroundColor:RGBCOLOR(0, 0, 100, 0.5)];
+        [self setDefaultStyleToView:countLabel];
         
         [countLabel setTextAlignment:NSTextAlignmentCenter];
-        
-        countLabel.layer.cornerRadius = 20;
-        countLabel.layer.masksToBounds = YES;
-        
         [countLabel setFont:[UIFont systemFontOfSize:20]];
         [countLabel setTextColor:[UIColor whiteColor]];
         
@@ -269,12 +255,51 @@ enum infoViewSubviews
 //    infoViewMutualFriendsLabel,
 //    infoViewPhotosLabel
     
-    [infoView addSubview:self.infoViewSubviews[infoViewFriendsCountLabel]];
-    [infoView addSubview:self.infoViewSubviews[infoViewMutualFriendsCountLabel]];
-    [infoView addSubview:self.infoViewSubviews[infoViewPhotosCountLabel]];
-    [infoView addSubview:self.infoViewSubviews[infoViewFriendsLabel]];
-    [infoView addSubview:self.infoViewSubviews[infoViewMutualFriendsLabel]];
-    [infoView addSubview:self.infoViewSubviews[infoViewPhotosLabel]];
+    
+#pragma mark phone label
+    
+    UILabel *lastLabel = [self.infoViewSubviews lastObject];
+    
+    UILabel *phoneLabel = [[UILabel alloc] initWithFrame:
+    CGRectMake(Intend,
+               CGRectGetMaxY(lastLabel.frame) + Intend,
+               infoView.frame.size.width - Intend * 2,
+               50)];
+    
+    [self setDefaultStyleToView:phoneLabel];
+    [phoneLabel setTextColor:[UIColor whiteColor]];
+    [phoneLabel setText:self.user.phone];
+    [phoneLabel setTextAlignment:NSTextAlignmentCenter];
+    [phoneLabel addGestureRecognizer:[[UITapGestureRecognizer alloc]
+                                      initWithTarget:self
+                                      action:@selector(didPressPhoneLabel:)]];
+
+    
+#pragma mark email label
+    
+    CGRect frame = phoneLabel.frame;
+    
+    frame.origin.y = CGRectGetMaxY(frame) + Intend;
+    
+    UILabel *emailLabel = [[UILabel alloc] initWithFrame:frame];
+    
+    [self setDefaultStyleToView:emailLabel];
+    [emailLabel setText:self.user.email];
+
+    [emailLabel addGestureRecognizer:[[UITapGestureRecognizer alloc]
+                                      initWithTarget:self
+                                      action:@selector(didPressEmailLabel:)]] ;
+    
+#pragma mark subviews adding
+    
+    [infoView addSubview:self.infoViewSubviews[InfoViewFriendsCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[InfoViewMutualFriendsCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[InfoViewPhotosCountLabel]];
+    [infoView addSubview:self.infoViewSubviews[InfoViewFriendsLabel]];
+    [infoView addSubview:self.infoViewSubviews[InfoViewMutualFriendsLabel]];
+    [infoView addSubview:self.infoViewSubviews[InfoViewPhotosLabel]];
+    [infoView addSubview:phoneLabel];
+    [infoView addSubview:emailLabel];
     
     [self.scrollView addSubview:backgroundImageView];
     [self.scrollView addSubview:self.topBackgroundImageView];
@@ -289,7 +314,6 @@ enum infoViewSubviews
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
-    NSLog(@"%f", scrollView.contentOffset.y);
     
 #pragma mark background image animation
     
@@ -328,9 +352,7 @@ enum infoViewSubviews
         CGRect frame = self.slidingNameLabel.frame;
         frame.origin = CGPointMake(0, 0);
         self.slidingNameLabel.frame = frame;
-        
     }
-    
     
 }
 
@@ -355,9 +377,55 @@ enum infoViewSubviews
     ViewController *controller =
     [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ViewController class])];
     
-    controller.users = [self.user.rlsFriends allObjects];
+    controller.users = [self.user.rlsFriends allObjects].mutableCopy;
     
     [self.navigationController pushViewController:controller animated:YES];
+    
+}
+
+- (void)didTapMutualLabel:(UITapGestureRecognizer *)sender
+{
+    ViewController *controller =
+    [self.storyboard instantiateViewControllerWithIdentifier:NSStringFromClass([ViewController class])];
+    
+    controller.users = self.mutualFriends;
+    
+    [self.navigationController pushViewController:controller animated:YES];
+}
+
+- (void)didPressPhoneLabel:(UITapGestureRecognizer *)sender
+{
+    UILabel *label = (UILabel *)sender.view;
+    
+    [[UIApplication sharedApplication]
+     openURL:[NSURL URLWithString:
+              [NSString stringWithFormat:@"tel:%@", label.text]]];
+}
+
+- (void)didPressEmailLabel:(UITapGestureRecognizer *)sender
+{
+    if([MFMailComposeViewController canSendMail]) {
+        
+        VZUser *user = [[[DataManager sharedManager] allVZUsersData] objectAtIndex:self.userID];
+        
+        MFMailComposeViewController *mailCont = [[MFMailComposeViewController alloc] init];
+        mailCont.mailComposeDelegate = self;
+        
+        [mailCont setSubject:[NSString stringWithFormat:@"%@ %@", user.firstName, user.lastName]];
+        [mailCont setToRecipients:[NSArray arrayWithObject:user.email]];
+        [mailCont setMessageBody:@"Hi! How are you?" isHTML:NO];
+        
+        [self presentViewController:mailCont animated:YES completion:nil];
+    }
+
+}
+
+#pragma mark - MFMailComposeViewControllerDelegate implementation
+
+- (void)mailComposeController:(MFMailComposeViewController *)controller
+          didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error {
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
     
 }
 
@@ -372,6 +440,47 @@ enum infoViewSubviews
     duplicateLabel.textAlignment = label.textAlignment;
         
     return duplicateLabel;
+}
+
+- (NSMutableArray *)getMutalFriendsArray
+{
+    NSMutableArray *mutualFriendsArray = [[NSMutableArray alloc] init];
+    
+    VZUser *rootUser = [[[DataManager sharedManager] allVZUsersData] firstObject];
+    VZUser *currentUser = [self.parentController.users objectAtIndex:self.userID];
+    
+    for (VZUser *rootUserFriend in rootUser.rlsFriends) {
+        
+        for (VZUser *currentUserFriend in currentUser.rlsFriends) {
+            
+            if (rootUserFriend == currentUserFriend) {
+                
+                [mutualFriendsArray addObject:currentUserFriend];
+                
+            }
+            
+        }
+        
+    }
+    
+    return mutualFriendsArray;
+}
+
+- (void)setDefaultStyleToView:(UIView *)view
+{
+    [view setBackgroundColor:RGBCOLOR(0, 0, 100, 0.5)];
+    [view setUserInteractionEnabled:YES];
+
+    view.layer.cornerRadius = 20;
+    view.layer.masksToBounds = YES;
+    
+    if ([view isKindOfClass:[UILabel class]]) {
+        UILabel *label = (UILabel *)view;
+        
+        [label setTextColor:[UIColor whiteColor]];
+        [label setTextAlignment:NSTextAlignmentCenter];
+    }
+
 }
 
 

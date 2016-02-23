@@ -10,7 +10,7 @@
 
 @interface ViewController : UIViewController
 
-@property (nonatomic, strong) NSArray *users;
+@property (nonatomic, strong) NSMutableArray *users;
 
 @end
 
